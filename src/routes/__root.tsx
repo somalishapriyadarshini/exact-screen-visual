@@ -10,6 +10,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { PlanProvider } from "../planpulse/store";
+import { AppShell } from "../planpulse/shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
