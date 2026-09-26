@@ -11,3 +11,4 @@
 
 - Keep PlanPulse demo data and risk calculations in a client-safe module, with shared in-memory state in a root provider; the requested prototype has no backend.
 - Use TanStack file routes for the five screens and a shared shell for project navigation, because direct links need distinct pages.
+- Parse uploaded transcripts in the browser and merge their extracted text into Intake notes, because this demo does not persist or upload files to a server.
