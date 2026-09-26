@@ -26,7 +26,6 @@ export async function readTranscript(file: File): Promise<string> {
       pages.push(text.items.map(item => 'str' in item ? item.str : '').join(' '));
     }
     content = pages.join('\n');
-    await document.destroy();
   } else {
     throw new Error('Use TXT, MD, SRT, VTT, CSV, JSON, LOG, DOCX, or PDF.');
   }
