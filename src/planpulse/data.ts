@@ -45,14 +45,14 @@ export function riskBreakdown(task:Task,tasks:Task[],members:Member[]) {
   if(task.status==='done') return {staleness:0,blocked_depth:0,owner_overload:0,deadline:0};
   const member = members.find(m=>m.id===task.assignee_member_id);
   const assigned = member ? tasks.filter(t=>t.assignee_member_id===member.id && t.status!=='done').reduce((sum,t)=>sum+t.estimate_hours,0) : 0;
-  const S = task.status==='todo'?0:daysInStatus(task)/7;
-  const B = tasks.length ? blockedCount(task,tasks)/tasks.length : 0;
-  const L = member ? Math.max(0,assigned/Math.max(1,member.capacity_hours)-1) : 0;
-  const D = Math.max(0,1-differenceInCalendarDays(new Date(task.due_date+'T12:00:00'),new Date())/(Math.max(1,task.estimate_hours)/6));
+  const S = task.status==='todo'?0:Math.min(1,daysInStatus(task)/7);
+  const B = tasks.length ? Math.min(1,blockedCount(task,tasks)/tasks.length) : 0;
+  const L = member ? Math.min(1,Math.max(0,assigned/Math.max(1,member.capacity_hours)-1)) : 0;
+  const D = Math.min(1,Math.max(0,1-differenceInCalendarDays(new Date(task.due_date+'T12:00:00'),new Date())/Math.max(.5,task.estimate_hours/6)));
   return {staleness:30*S,blocked_depth:25*B,owner_overload:25*L,deadline:20*D};
 }
 export function taskRisk(t:Task,tasks:Task[],members:Member[]) { const b=riskBreakdown(t,tasks,members); return Math.max(0,Math.min(100,Math.round(Object.values(b).reduce((a,c)=>a+c,0)))); }
-export function projectHealth(tasks:Task[],members:Member[]) { const risks=tasks.filter(t=>t.status!=='done').map(t=>taskRisk(t,tasks,members)); if(!risks.length)return 100; return Math.max(0,Math.round(100-(.6*Math.max(...risks)+.4*risks.reduce((a,b)=>a+b,0)/risks.length))); }
+export function projectHealth(tasks:Task[],members:Member[]) { const live=tasks.filter(t=>t.status!=='done'); if(!live.length)return 100; const risks=live.map(t=>taskRisk(t,tasks,members)); const hours=live.reduce((sum,t)=>sum+t.estimate_hours,0);const average=live.reduce((sum,t,i)=>sum+risks[i]*t.estimate_hours,0)/Math.max(1,hours); return Math.max(0,Math.round(100-(.6*Math.max(...risks)+.4*average))); }
 export function riskBand(score:number) { return score>=85?'severe':score>=65?'high':score>=45?'med':score>=25?'low':'none'; }
 export function riskReason(t:Task,tasks:Task[],members:Member[]) {
   const b=riskBreakdown(t,tasks,members); const max=Object.entries(b).sort((a,c)=>c[1]-a[1])[0]?.[0];
