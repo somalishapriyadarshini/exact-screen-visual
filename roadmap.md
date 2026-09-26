@@ -1,3 +1,3 @@
-- [ ] Build the five PlanPulse screens and shared navigation
-- [ ] Implement task risk calculations, editing, drag-and-drop, intake, settings, and replanning
-- [ ] Verify the demo board and interactions in the preview
+- [x] Build the five PlanPulse screens and shared navigation
+- [x] Implement task risk calculations, editing, drag-and-drop, intake, settings, and replanning
+- [x] Verify the demo board and interactions in the preview
