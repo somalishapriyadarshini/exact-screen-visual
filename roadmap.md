@@ -1,5 +1,5 @@
 - [x] Build the five PlanPulse screens and shared navigation
 - [x] Implement task risk calculations, editing, drag-and-drop, intake, settings, and replanning
 - [x] Verify the demo board and interactions in the preview
-- [ ] Match the uploaded PlanPulse mockup's sample project, team, tasks, and visual hierarchy
-- [ ] Add multiple transcript file uploads to Intake and verify drafting from their extracted text
+- [x] Match the uploaded PlanPulse mockup's sample project, team, tasks, and visual hierarchy
+- [x] Add multiple transcript file uploads to Intake and verify drafting from their extracted text
