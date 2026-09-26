@@ -10,33 +10,88 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as PIdIndexRouteImport } from './routes/p.$id.index'
+import { Route as PIdIntakeRouteImport } from './routes/p.$id.intake'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PIdIndexRoute = PIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PIdRoute,
+} as any)
+const PIdIntakeRoute = PIdIntakeRouteImport.update({
+  id: '/intake',
+  path: '/intake',
+  getParentRoute: () => PIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/settings': typeof SettingsRoute
+  '/p/$id': typeof PIdRouteWithChildren
+  '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id/': typeof PIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/settings': typeof SettingsRoute
+  '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id': typeof PIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/settings': typeof SettingsRoute
+  '/p/$id': typeof PIdRouteWithChildren
+  '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id/': typeof PIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/auth' | '/settings' | '/p/$id' | '/p/$id/intake' | '/p/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/settings' | '/p/$id/intake' | '/p/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/settings'
+    | '/p/$id'
+    | '/p/$id/intake'
+    | '/p/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  SettingsRoute: typeof SettingsRoute
+  PIdRoute: typeof PIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +103,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$id/': {
+      id: '/p/$id/'
+      path: '/'
+      fullPath: '/p/$id/'
+      preLoaderRoute: typeof PIdIndexRouteImport
+      parentRoute: typeof PIdRoute
+    }
+    '/p/$id/intake': {
+      id: '/p/$id/intake'
+      path: '/intake'
+      fullPath: '/p/$id/intake'
+      preLoaderRoute: typeof PIdIntakeRouteImport
+      parentRoute: typeof PIdRoute
+    }
   }
 }
 
+interface PIdRouteChildren {
+  PIdIntakeRoute: typeof PIdIntakeRoute
+  PIdIndexRoute: typeof PIdIndexRoute
+}
+
+const PIdRouteChildren: PIdRouteChildren = {
+  PIdIntakeRoute: PIdIntakeRoute,
+  PIdIndexRoute: PIdIndexRoute,
+}
+
+const PIdRouteWithChildren = PIdRoute._addFileChildren(PIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  SettingsRoute: SettingsRoute,
+  PIdRoute: PIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

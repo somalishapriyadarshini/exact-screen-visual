@@ -1,24 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+import { useState } from 'react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ArrowRight, FolderKanban, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { usePlan } from '@/planpulse/store';
+import { dateFromNow, projectHealth } from '@/planpulse/data';
+import { Avatar, formatDate, HealthDial } from '@/planpulse/ui';
+export const Route=createFileRoute('/')({head:()=>({meta:[{title:'Projects — PlanPulse'},{name:'description',content:'Track project health, spot delivery risks, and keep your team on course with PlanPulse.'},{property:'og:title',content:'Projects — PlanPulse'},{property:'og:description',content:'Track project health, spot delivery risks, and keep your team on course with PlanPulse.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Home});
+function Home(){const {projects,setProjects,tasks,members}=usePlan();const [open,setOpen]=useState(false);const [name,setName]=useState('');const [date,setDate]=useState(dateFromNow(14));return <main className="mx-auto max-w-6xl px-4 py-10 md:px-8"><div className="mb-8 flex items-end justify-between"><div><span className="label">Workspace / Overview</span><h1 className="mt-3 text-3xl font-semibold">Projects</h1><p className="mt-2 text-sm text-muted-foreground">Keep delivery in sight.</p></div><Button onClick={()=>setOpen(true)}><Plus/> New project</Button></div>{projects.length?<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{projects.map(p=>{const health=p.id==='demo'?projectHealth(tasks,members):100;return <Link to="/p/$id" params={{id:p.id}} key={p.id} className={`risk-${health<45?'high':health<75?'med':'none'} risk-border panel group block p-5 transition-colors hover:bg-secondary`}><div className="flex items-start justify-between"><span className="rounded-sm border border-border bg-secondary p-2"><FolderKanban size={18}/></span><ArrowRight size={16} className="text-faint transition-transform group-hover:translate-x-1"/></div><h2 className="mt-5 text-lg font-semibold">{p.name}</h2><div className="mt-4 flex justify-start"><HealthDial health={health}/></div><div className="mt-4 grid grid-cols-2 border-t border-border pt-4 text-xs"><div><div className="number font-semibold">{p.id==='demo'?tasks.length:0}</div><div className="label mt-1">Tasks</div></div><div><div className="number font-semibold">{formatDate(p.target_date)}</div><div className="label mt-1">Target</div></div></div><div className="mt-5 flex -space-x-2">{members.slice(0,4).map(m=><Avatar key={m.id} name={m.name} small/>)}</div></Link>})}</div>:<div className="flex flex-col items-center gap-4 border border-dashed border-border p-16 text-center"><FolderKanban size={32} className="text-muted-foreground"/><h2>No projects yet</h2><Button onClick={()=>setOpen(true)}>New project</Button></div>}<Dialog open={open} onOpenChange={setOpen}><DialogContent className="bg-card shadow-none"><DialogHeader><DialogTitle>New project</DialogTitle></DialogHeader><form className="space-y-4" onSubmit={e=>{e.preventDefault();if(name.trim()){setProjects(ps=>[...ps,{id:`project-${Date.now()}`,name:name.trim(),target_date:date}]);setName('');setOpen(false)}}}><div><label htmlFor="project-name" className="label mb-2 block">Name</label><Input id="project-name" required value={name} onChange={e=>setName(e.target.value)} placeholder="Project name"/></div><div><label htmlFor="project-target" className="label mb-2 block">Target date</label><Input id="project-target" required type="date" value={date} onChange={e=>setDate(e.target.value)}/></div><Button type="submit" className="w-full">Create project</Button></form></DialogContent></Dialog></main>}
