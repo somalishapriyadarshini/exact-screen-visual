@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as PIdIndexRouteImport } from './routes/p.$id.index'
 import { Route as PIdIntakeRouteImport } from './routes/p.$id.intake'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const PIdRoute = PIdRouteImport.update({
   path: '/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PIdIndexRoute = PIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PIdRoute,
+} as any)
 const PIdIntakeRoute = PIdIntakeRouteImport.update({
   id: '/intake',
   path: '/intake',
@@ -47,13 +53,14 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/p/$id': typeof PIdRouteWithChildren
   '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id/': typeof PIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/settings': typeof SettingsRoute
-  '/p/$id': typeof PIdRouteWithChildren
   '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id': typeof PIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +69,22 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/p/$id': typeof PIdRouteWithChildren
   '/p/$id/intake': typeof PIdIntakeRoute
+  '/p/$id/': typeof PIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/settings' | '/p/$id' | '/p/$id/intake'
+  fullPaths:
+    '/' | '/auth' | '/settings' | '/p/$id' | '/p/$id/intake' | '/p/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/settings' | '/p/$id' | '/p/$id/intake'
-  id: '__root__' | '/' | '/auth' | '/settings' | '/p/$id' | '/p/$id/intake'
+  to: '/' | '/auth' | '/settings' | '/p/$id/intake' | '/p/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/settings'
+    | '/p/$id'
+    | '/p/$id/intake'
+    | '/p/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -108,6 +124,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$id/': {
+      id: '/p/$id/'
+      path: '/'
+      fullPath: '/p/$id/'
+      preLoaderRoute: typeof PIdIndexRouteImport
+      parentRoute: typeof PIdRoute
+    }
     '/p/$id/intake': {
       id: '/p/$id/intake'
       path: '/intake'
@@ -120,10 +143,12 @@ declare module '@tanstack/react-router' {
 
 interface PIdRouteChildren {
   PIdIntakeRoute: typeof PIdIntakeRoute
+  PIdIndexRoute: typeof PIdIndexRoute
 }
 
 const PIdRouteChildren: PIdRouteChildren = {
   PIdIntakeRoute: PIdIntakeRoute,
+  PIdIndexRoute: PIdIndexRoute,
 }
 
 const PIdRouteWithChildren = PIdRoute._addFileChildren(PIdRouteChildren)
