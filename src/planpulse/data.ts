@@ -65,10 +65,10 @@ export type PlanChange = {taskId:string; type:'reassigned'|'rescheduled'; from:s
 export function makeReplan(tasks:Task[],members:Member[]) {
   let proposed=tasks.map(t=>({...t})); const changes:PlanChange[]=[];
   const loads=()=>Object.fromEntries(members.map(m=>[m.id,proposed.filter(t=>t.assignee_member_id===m.id&&t.status!=='done').reduce((a,t)=>a+t.estimate_hours,0)]));
-  const overloaded=members.flatMap(m=>{const load=loads()[m.id];return load>m.capacity_hours ? proposed.filter(t=>t.assignee_member_id===m.id&&t.status!=='done').sort((a,b)=>b.estimate_hours-a.estimate_hours).map(t=>({t,m})) : []});
+  const overloaded=members.flatMap(m=>{const load=loads()[m.id] ?? 0;return load>m.capacity_hours ? proposed.filter(t=>t.assignee_member_id===m.id&&t.status!=='done').sort((a,b)=>b.estimate_hours-a.estimate_hours).map(t=>({t,m})) : []});
   for(const {t,m} of overloaded){
-    if(loads()[m.id]<=m.capacity_hours) continue;
-    const target=members.filter(n=>n.id!==m.id && loads()[n.id]+t.estimate_hours<=n.capacity_hours).sort((a,b)=>(loads()[a.id]/a.capacity_hours)-(loads()[b.id]/b.capacity_hours))[0];
+    if((loads()[m.id] ?? 0)<=m.capacity_hours) continue;
+    const target=members.filter(n=>n.id!==m.id && (loads()[n.id] ?? 0)+t.estimate_hours<=n.capacity_hours).sort((a,b)=>((loads()[a.id] ?? 0)/a.capacity_hours)-((loads()[b.id] ?? 0)/b.capacity_hours))[0];
     if(!target) continue;
     changes.push({taskId:t.id,type:'reassigned',from:m.name,to:target.name,reason:`${m.name.split(' ')[0]} is over capacity; ${target.name.split(' ')[0]} has room this week`});
     proposed=proposed.map(p=>p.id===t.id?{...p,assignee_member_id:target.id}:p);
